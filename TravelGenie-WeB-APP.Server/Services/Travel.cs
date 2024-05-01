@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Newtonsoft.Json;
 using System.Text;
 using TravelGenie_WeB_APP.Server.Dtos;
 
@@ -68,18 +69,18 @@ namespace TravelGenie_WeB_APP.Server.Services
             }
         }
 
-        public async Task<string> GetPlanDetail(string prompt)
+        public async Task<ChatGptDto> GetPlanDetail(string prompt)
         {
             try
             {
                 var conversation = new[]
                 {
-                    new
-                    {
-                        content = $"{prompt}",
-                        role = "user"
-                    }
-                };
+            new
+            {
+                content = $"{prompt}",
+                role = "user"
+            }
+        };
 
                 using (var client = new HttpClient())
                 {
@@ -96,22 +97,22 @@ namespace TravelGenie_WeB_APP.Server.Services
                         response.EnsureSuccessStatusCode();
 
                         var jsonResponse = await response.Content.ReadAsStringAsync();
-                        return jsonResponse;
+                        var AiResponse = JsonConvert.DeserializeObject<ChatGptDto>(jsonResponse);
+
+                        return AiResponse;
                     }
                 }
             }
             catch (HttpRequestException ex)
             {
-                Console.WriteLine($"HTTP Request Error: {ex.Message}");
-                return null;
+                throw ex;
             }
             catch (Exception ex)
             {
-
-                Console.WriteLine($"Error: {ex.Message}");
-                return null;
+                throw ex;
             }
         }
+
 
     }
 }
